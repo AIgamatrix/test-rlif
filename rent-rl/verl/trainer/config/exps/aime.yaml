@@ -1,0 +1,27 @@
+# @package _global_
+
+ngpus: 2
+
+data:
+  train_files: ${oc.env:USERPath}/rent-rl/data/train.parquet
+  val_files: ${oc.env:USERPath}/rent-rl/data/train.parquet
+  max_prompt_length: 1024
+  max_response_length: 3072
+  filter_overlong_prompts: true
+  train_batch_size: 30
+
+actor_rollout_ref:
+    actor:
+      ppo_mini_batch_size: 30
+      ppo_micro_batch_size_per_gpu: 15
+    rollout:
+      val_kwargs:
+        # sampling parameters for validation
+        top_k: -1 # 0 for hf rollout, -1 for vllm rollout
+        top_p: 0.5
+        temperature: 0.8
+        n: 64
+
+trainer:
+  test_freq: 1
+  total_epochs: 150

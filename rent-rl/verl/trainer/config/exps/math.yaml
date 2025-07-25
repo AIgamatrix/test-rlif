@@ -1,0 +1,17 @@
+# @package _global_
+
+data:
+  train_files: ${oc.env:HOME}/data/math/train.parquet
+  val_files: ${oc.env:HOME}/data/math/test.parquet
+  train_batch_size: 500
+  max_prompt_length: 1024
+  max_response_length: 1024
+  filter_overlong_prompts: true
+
+actor_rollout_ref:
+  actor:
+    ppo_micro_batch_size_per_gpu: 16
+  rollout:
+    log_prob_micro_batch_size_per_gpu: 16
+  ref:
+    log_prob_micro_batch_size_per_gpu: 16

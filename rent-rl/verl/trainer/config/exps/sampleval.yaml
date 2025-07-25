@@ -1,0 +1,12 @@
+# @package _global_
+
+actor_rollout_ref:
+  rollout:
+    val_kwargs:
+      # sampling parameters for validation
+      top_k: -1 # 0 for hf rollout, -1 for vllm rollout
+      top_p: 0.5
+      temperature: 0.8
+      n: 1
+      do_sample: True # default eager for validation
+

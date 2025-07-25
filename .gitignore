@@ -1,0 +1,103 @@
+temp.ipynb
+MATH-lighteval/
+AIME2024/
+Miniconda3-latest-Linux-x86_64.sh
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache directories
+.cache/
+*.cache
+
+# Model files and checkpoints
+*.bin
+*.safetensors
+checkpoints/
+outputs/
+
+# Hugging Face cache
+.cache/huggingface/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Large data files
+*.parquet
+*.json.gz
+*.tar.gz
+*.zip
+
+# Conda installer
+Miniconda3-latest-Linux-x86_64.sh
+
+# Ray temporary files
+/tmp/ray/
+
+# Weights & Biases
+wandb/
+
+# MLflow
+mlruns/
+
+# TensorBoard
+tensorboard_log/
+
+# Specific large directories that should be excluded
+AIME2024/
+MATH-lighteval/
+Qwen2.5-Math-1.5B/
+
+# Lock files
+*.lock

@@ -1,0 +1,4 @@
+# @package _global_
+
+trainer:
+  set_entropy_zero: True

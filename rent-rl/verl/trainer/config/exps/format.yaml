@@ -1,0 +1,4 @@
+# @package _global_
+
+trainer:
+  base_format: True

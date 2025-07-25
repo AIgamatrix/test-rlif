@@ -1,0 +1,22 @@
+# @package _global_
+
+data:
+  train_files: ${oc.env:HOME}/data/countdown/train.parquet
+  val_files: ${oc.env:HOME}/data/countdown/test.parquet
+  max_response_length: 2048
+  filter_overlong_prompts: true
+
+
+actor_rollout_ref:
+  rollout:
+    val_kwargs:
+      # sampling parameters for validation
+      top_k: -1 # 0 for hf rollout, -1 for vllm rollout
+      top_p: 0.5
+      temperature: 0.8
+      n: 4
+
+
+trainer:
+  test_freq: 5 # 320k element dataset 
+  total_epochs: 1

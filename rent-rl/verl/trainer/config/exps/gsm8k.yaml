@@ -1,0 +1,12 @@
+# @package _global_
+
+data:
+  train_files: ${oc.env:HOME}/data/gsm8k/train.parquet
+  val_files: ${oc.env:HOME}/data/gsm8k/test.parquet
+  max_response_length: 1024
+  filter_overlong_prompts: true
+
+actor_rollout_ref:
+  rollout: 
+    val_kwargs:
+      n: 5

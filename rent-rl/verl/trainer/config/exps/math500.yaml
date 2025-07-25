@@ -1,0 +1,22 @@
+# @package _global_
+
+data:
+  train_files: ${oc.env:HOME}/data/math500/test.parquet
+  val_files: ${oc.env:HOME}/data/math500/test.parquet
+  max_prompt_length: 1024
+  max_response_length: 3072
+  filter_overlong_prompts: true
+  train_batch_size: 500
+
+actor_rollout_ref:
+  rollout:
+    val_kwargs:
+      # sampling parameters for validation
+      top_k: -1 # 0 for hf rollout, -1 for vllm rollout
+      top_p: 0.5
+      temperature: 0.8
+      n: 5
+
+trainer:
+  test_freq: 1
+  total_epochs: 200

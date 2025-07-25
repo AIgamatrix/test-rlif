@@ -1,0 +1,6 @@
+# @package _global_
+
+trainer:
+  minimize_entropy: true
+  entropy_base: 7.0
+  test_freq: 1
