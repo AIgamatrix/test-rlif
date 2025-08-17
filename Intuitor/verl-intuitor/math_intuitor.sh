@@ -5,7 +5,12 @@ export WANDB_MODE=disabled
 export ACCELERATE_LOG_LEVEL=info
 export HYDRA_FULL_ERROR=1
 
-#USERPath="/home/big-leg/test-rlif"
+DATE=$(date +"%Y%m%d")
+TIME_TAG=$(date +"%H%M%S")
+
+
+
+OUTPUT_DIR="$USERPath/Intuitor/verl-intuitor/${DATE}-${TIME_TAG}"
 BACKBONE="$USERPath/Qwen2.5-Math-1.5B"
 
 PYTHONUNBUFFERED=1 python3 -m verl.trainer.main_ppo \
@@ -41,11 +46,12 @@ PYTHONUNBUFFERED=1 python3 -m verl.trainer.main_ppo \
     algorithm.use_kl_in_reward=False \
     trainer.critic_warmup=0 \
     trainer.val_before_train=False \
-    trainer.n_gpus_per_node=2 \
+    trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
     trainer.logger=['console','wandb'] \
     trainer.project_name=verl \
     trainer.experiment_name=math_intuitor \
+    trainer.default_local_dir=$OUTPUT_DIR \
     trainer.save_freq=10 \
     trainer.test_freq=10 \
     trainer.total_epochs=1 2>&1 | tee verl_math_intuitor.log

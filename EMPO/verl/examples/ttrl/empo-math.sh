@@ -18,7 +18,7 @@ BACKBONE_PATH="${BACKBONE}"
 ADVANTAGE="grpo"
 
 # GPU配置
-N_GPUS_PER_NODE=2
+N_GPUS_PER_NODE=8
 GPU_IDS=$(seq -s, 0 $((N_GPUS_PER_NODE-1)))
 export CUDA_VISIBLE_DEVICES=$GPU_IDS
 
@@ -47,7 +47,8 @@ EXPERIMENT="${TARGET}-Len@${K}k-bz-${DATA_TRAIN_BATCH_SIZE}-thres-${ENTROPY_THRE
 
 WANDB_PROJECT="TTRL-verl"
 LOG_NAME="${DATE}-${EXPERIMENT}-${MODEL}-${ADVANTAGE}"
-OUTPUT_DIR="/fs-computility/prime/shared/zqy_models/checkpoints/${WANDB_PROJECT}/${MODEL}/${DATE}/${EXPERIMENT}-${ADVANTAGE}-${TIME_TAG}"
+OUTPUT_DIR="$USERPath/checkpoints/EMPO/${DATE}-${TIME_TAG}"
+
 
 # ------------------------------------------------------------
 python -m verl.trainer.main_ppo \

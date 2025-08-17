@@ -38,7 +38,7 @@ EXPERIMENT="TTRL-Len@${K}k"
 
 WANDB_PROJECT="TTRL-verl"
 LOG_NAME="${DATE}-${EXPERIMENT}-${MODEL}-${ADVANTAGE}"
-OUTPUT_DIR="./checkpoints/${WANDB_PROJECT}/${MODEL}/${DATE}/${EXPERIMENT}-${ADVANTAGE}-${TIME_TAG}"
+OUTPUT_DIR="$USERPath/checkpoints/TTRL/${DATE}-${TIME_TAG}"
 
 # ------------------------------------------------------------
 python -m verl.trainer.main_ppo \
@@ -95,7 +95,7 @@ python -m verl.trainer.main_ppo \
   trainer.logger=['console','wandb'] \
   trainer.project_name=$WANDB_PROJECT \
   trainer.experiment_name=$LOG_NAME \
-  trainer.n_gpus_per_node=2 \
+  trainer.n_gpus_per_node=8 \
   trainer.nnodes=1 \
   trainer.save_freq=2000000 \
   trainer.test_freq=2 \

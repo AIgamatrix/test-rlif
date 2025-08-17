@@ -3,7 +3,7 @@ defaults:
    - /exps: []
 
 base_model: ${oc.env:USERPath}/Qwen2.5-Math-1.5B
-ngpus: 2
+ngpus: 8
 
 data:
   tokenizer: null
