@@ -1,0 +1,5 @@
+Dataset,Total_Questions,Origin_Correct,Origin_Accuracy,EMPO_Correct,EMPO_Accuracy,Intuitor_Correct,Intuitor_Accuracy,TTRL_Correct,TTRL_Accuracy,EMPO_vs_Origin,Intuitor_vs_Origin,TTRL_vs_Origin
+AIME,90,7,7.78%,5,5.56%,8,8.89%,9,10.0%,-2.22pp,+1.11pp,+2.22pp
+AMC12,83,17,20.48%,22,26.51%,33,39.76%,24,28.92%,+6.03pp,+19.28pp,+8.44pp
+GPQA,448,132,29.46%,118,26.34%,112,25.0%,113,25.22%,-3.12pp,-4.46pp,-4.24pp
+Minerva,272,33,12.13%,30,11.03%,29,10.66%,21,7.72%,-1.10pp,-1.47pp,-4.41pp

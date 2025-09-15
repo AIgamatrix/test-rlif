@@ -30,7 +30,7 @@ def extract_solution(solution_str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--local_dir", default="/home/big-leg/test-rlif/Intuitor/data/math")
+    parser.add_argument("--local_dir", default="/home/llama/test-rlif/Intuitor/data/math")
     parser.add_argument("--hdfs_dir", default=None)
     parser.add_argument("--model", default="other", choices=["Qwen2.5-1.5B", "Qwen2.5-3B", "Qwen2.5-7B", "other"])
     parser.add_argument("--seed", type=int, default=42, help="Random seed for shuffling the dataset")
@@ -46,10 +46,10 @@ if __name__ == "__main__":
     dataset = datasets.load_dataset(
         "parquet",
         data_files={
-            "train": "/home/big-leg/test-rlif/MATH-lighteval/**/train-*.parquet",
-            "test": "/home/big-leg/test-rlif/MATH-lighteval/**/test-*.parquet"
+            "train": "/home/llama/test-rlif/MATH-lighteval/**/train-*.parquet",
+            "test": "/home/llama/test-rlif/MATH-lighteval/**/test-*.parquet"
         },
-        cache_dir="/home/big-leg/test-rlif/MATH-lighteval"
+        cache_dir="/home/llama/test-rlif/MATH-lighteval"
     )
     train_dataset = dataset["train"]
     test_dataset = dataset["test"]

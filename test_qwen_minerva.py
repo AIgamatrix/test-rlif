@@ -9,6 +9,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from tqdm import tqdm
 import re
+import argparse
 
 def load_minerva_data(data_path):
     """加载Minerva数据"""
@@ -76,7 +77,7 @@ def test_qwen_model(model_path, data_path):
                 pad_token_id=tokenizer.eos_token_id
             )
         
-        response = tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+        response = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
         
         model_answer = extract_model_answer(response)
         
@@ -127,10 +128,15 @@ def save_results(results, output_path):
 
 def main():
     """主函数"""
-    model_path = "./Qwen2.5-Math-1.5B"
-    # 注意：这里的路径是假设的，因为minerva没有成功下载
-    data_path = "./datasets/minerva/test.jsonl" 
-    output_path = "./qwen_minerva_test_results.json"
+    parser = argparse.ArgumentParser(description="测试Qwen模型在Minerva上的表现")
+    parser.add_argument("--model-path", default="./Qwen2.5-Math-1.5B", type=str)
+    parser.add_argument("--data-path", default="./datasets/minerva/test.jsonl", type=str)
+    parser.add_argument("--output-path", default="./qwen_minerva_test_results.json", type=str)
+    args = parser.parse_args()
+
+    model_path = args.model_path
+    data_path = args.data_path
+    output_path = args.output_path
     
     if not os.path.exists(model_path):
         print(f"错误：模型路径 {model_path} 不存在")

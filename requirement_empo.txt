@@ -49,7 +49,8 @@ fastapi-cloud-cli==0.1.4
 fastrlock==0.8.3
 filelock==3.18.0
 flash-attn @ https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.0.post1/flash_attn-2.7.0.post1+cu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl#sha256=d5b200facacfa99662520c610ccab6a5986f0e24004178bb19f0ad4833350e12
-flashinfer-python==0.2.3+cu124torch2.6
+flashinfer-python==0.2.3
+#+cu124torch2.6
 frozenlist==1.7.0
 fsspec==2025.3.0
 gguf==0.17.1
@@ -82,7 +83,7 @@ jsonschema-specifications==2025.4.1
 jupyter_client==8.6.3
 jupyter_core==5.8.1
 lark==1.2.2
-latex2sympy2==1.9.1
+#latex2sympy2==1.9.1
 liger_kernel==0.6.0
 litellm==1.74.7
 llguidance==0.7.30

@@ -75,7 +75,6 @@ tmp/
 temp/
 
 # Large data files
-*.parquet
 *.json.gz
 *.tar.gz
 *.zip

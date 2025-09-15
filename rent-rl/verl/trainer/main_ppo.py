@@ -73,7 +73,7 @@ def run_ppo(config) -> None:
             "TOKENIZERS_PARALLELISM": "true", 
             "NCCL_DEBUG": "WARN", 
             "VLLM_LOGGING_LEVEL": "WARN",
-            "USERPath": os.environ.get("USERPath", "/home/big-leg/test-rlif"),
+            "USERPath": os.environ.get("USERPath", "/home/llama/test-rlif"),
             "HYDRA_FULL_ERROR": os.environ.get("HYDRA_FULL_ERROR", "1")
         }
         ray.init(

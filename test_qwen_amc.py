@@ -12,11 +12,13 @@ from typing import List, Dict, Any
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import re
+import argparse
 
 class AMC12Tester:
-    def __init__(self, model_path: str = "./Qwen2.5-Math-1.5B"):
+    def __init__(self, model_path: str = "./Qwen2.5-Math-1.5B", data_path: str = "./datasets/amc12/data/train-00000-of-00001.parquet"):
         """初始化AMC12测试器"""
         self.model_path = model_path
+        self.data_path = data_path
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         print(f"正在加载模型: {model_path}")
@@ -33,7 +35,7 @@ class AMC12Tester:
     
     def load_amc12_data(self):
         """加载AMC12数据集"""
-        data_path = "./datasets/amc12/data/train-00000-of-00001.parquet"
+        data_path = self.data_path
         
         if not os.path.exists(data_path):
             raise FileNotFoundError(f"AMC12数据集未找到: {data_path}")
@@ -91,7 +93,7 @@ class AMC12Tester:
             )
         
         # 解码响应
-        response = self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+        response = self.tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
         extracted_answer = self.extract_answer(response)
         
         # 检查答案是否正确
@@ -200,17 +202,23 @@ class AMC12Tester:
 
 def main():
     """主函数"""
+    parser = argparse.ArgumentParser(description="AMC12 Qwen2.5模型测试")
+    parser.add_argument("--model-path", default="./Qwen2.5-Math-1.5B", type=str)
+    parser.add_argument("--data-path", default="./datasets/amc12/data/train-00000-of-00001.parquet", type=str)
+    parser.add_argument("--output-path", default="./qwen_amc12_test_results.json", type=str)
+    args = parser.parse_args()
+
     print("AMC12 Qwen2.5模型测试")
     print("=" * 50)
     
     # 初始化测试器
-    tester = AMC12Tester()
+    tester = AMC12Tester(model_path=args.model_path, data_path=args.data_path)
     
     # 运行测试
     results = tester.run_tests()
     
     # 保存结果
-    tester.save_results(results)
+    tester.save_results(results, args.output_path)
     
     # 生成报告
     report = tester.generate_summary_report(results)

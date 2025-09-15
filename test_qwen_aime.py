@@ -9,6 +9,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from tqdm import tqdm
 import re
+import argparse
 
 def load_aime_data(data_path):
     """加载AIME数据"""
@@ -76,7 +77,7 @@ def test_qwen_model(model_path, data_path):
                 pad_token_id=tokenizer.eos_token_id
             )
         
-        response = tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+        response = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
         
         model_answer = extract_model_answer(response)
         
@@ -127,9 +128,15 @@ def save_results(results, output_path):
 
 def main():
     """主函数"""
-    model_path = "./Qwen2.5-Math-1.5B"
-    data_path = "./datasets/aime24/data/train-00000-of-00001.parquet"
-    output_path = "./qwen_aime_test_results.json"
+    parser = argparse.ArgumentParser(description="测试本地Qwen2.5模型在AIME数据集上的表现")
+    parser.add_argument("--model-path", default="./Qwen2.5-Math-1.5B", type=str)
+    parser.add_argument("--data-path", default="./datasets/aime24/data/train-00000-of-00001.parquet", type=str)
+    parser.add_argument("--output-path", default="./qwen_aime_test_results.json", type=str)
+    args = parser.parse_args()
+
+    model_path = args.model_path
+    data_path = args.data_path
+    output_path = args.output_path
     
     if not os.path.exists(model_path):
         print(f"错误：模型路径 {model_path} 不存在")

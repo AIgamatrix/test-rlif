@@ -30,7 +30,7 @@ def extract_solution(solution_str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--local_dir", default="~/data/aime")
+    parser.add_argument("--local_dir", default="/home/llama/test-rlif/rent-rl/data/aime")
     parser.add_argument("--hdfs_dir", default=None)
 
     args = parser.parse_args()
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     data_source = "HuggingFaceH4/aime_2024"
     data_source = "Maxwell-Jia/AIME_2024"
     print(f"Loading the {data_source} dataset from huggingface...", flush=True)
-    #dataset = datasets.load_dataset(data_source, trust_remote_code=True)
-    dataset = datasets.load_dataset("parquet", data_files="/home/big-leg/test-rlif/AIME2024/*.parquet")
+    dataset = datasets.load_dataset(data_source, trust_remote_code=True)
+    #dataset = datasets.load_dataset("parquet", data_files="/home/llama/test-rlif/AIME2024/*.parquet")
     # train_dataset = dataset["train"]
     test_dataset = dataset["train"]
 

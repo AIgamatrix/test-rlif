@@ -11,7 +11,7 @@ TIME_TAG=$(date +%H%M%S)
 
 TASK="AIME-TTT"
 BACKBONE="Qwen2.5-Math-1.5B"
-USERPath="/home/big-leg/test-rlif"
+#USERPath="/home/llama/test-rlif"
 ADVANTAGE="grpo"
 
 K=3
