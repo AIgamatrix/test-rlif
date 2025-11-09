@@ -1,7 +1,7 @@
 #!/bin/bash
 #export VLLM_ATTENTION_BACKEND=XFORMERS
 unset VLLM_ATTENTION_BACKEND
-export WANDB_MODE=disabled
+export WANDB_MODE=online
 export VLLM_USE_V1=1
 
 # ------------------------------------------------------------
@@ -30,15 +30,15 @@ N_SAMPLES_PER_PROMPT=32
 MINI_BATCH_SIZE=1
 MICRO_BATCH_SIZE=2
 
-DATA_LOCAL_DIR="${USERPath}/TTRL/verl/data"
+DATA_LOCAL_DIR="${USERPath}/MyRLIF/verl/data"
 BACKBONE_PATH="${USERPath}/${BACKBONE}"
 
 MODEL="${TASK}-${BACKBONE}"
-EXPERIMENT="TTRL-Len@${K}k"
+EXPERIMENT="MYRLIF-Len@${K}k"
 
-WANDB_PROJECT="TTRL-verl"
+WANDB_PROJECT="MYRLIF-verl"
 LOG_NAME="${DATE}-${EXPERIMENT}-${MODEL}-${ADVANTAGE}"
-OUTPUT_DIR="$USERPath/checkpoints/TTRL/${DATE}-${TIME_TAG}"
+OUTPUT_DIR="$USERPath/checkpoints/MYRLIF/${DATE}-${TIME_TAG}"
 
 # ------------------------------------------------------------
 python -m verl.trainer.main_ppo \
@@ -46,6 +46,10 @@ python -m verl.trainer.main_ppo \
   reward_model.reward_kwargs.n_samples_per_prompt=$N_SAMPLES_PER_PROMPT \
   reward_model.reward_kwargs.n_votes_per_prompt=$N_VOTES_PER_PROMPT \
   reward_model.reward_kwargs.mode="train" \
+  reward_model.reward_kwargs.cluster_backend="embedding" \
+  reward_model.reward_kwargs.embedding_model_name="tbs17/MathBERT" \
+  reward_model.reward_kwargs.sim_threshold=0.7 \
+  reward_model.reward_kwargs.embed_device="cuda" \
   data.train_files=["$DATA_LOCAL_DIR/$TASK/train.parquet"] \
   data.val_files=["$DATA_LOCAL_DIR/$TASK/test.parquet"] \
   data.max_prompt_length=$MAX_PROMPT_LENGTH \

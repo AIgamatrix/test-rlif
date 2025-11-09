@@ -38,6 +38,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--local_dir", default="/home/test/test05/cgq/data/MATH-TTRL")
     parser.add_argument("--hdfs_dir", default=None)
+    parser.add_argument(
+        "--system_prompt",
+        default="Let's think step by step, and each step is atomic (single core reasoning/operation/answer)",
+        help="为Qwen添加的system提示词内容；留空则不添加system消息。",
+    )
 
     args = parser.parse_args()
 
@@ -56,20 +61,26 @@ if __name__ == "__main__":
     train_dataset = dataset["train"]
     # test_dataset = dataset["test"]
 
-    instruction_following = "Let's think step by step and output the final answer within \\boxed{}."
+    instruction_following = "please output the final answer within \\boxed{}."
 
     # add a row to each data item that represents a unique id
-    def make_map_fn(split):
+    def make_map_fn(split, system_prompt: str):
         def process_fn(example, idx):
             question = example.pop("problem")
 
-            # question = question + " " + instruction_following
+            question = question + " " + instruction_following
 
             answer = example.pop("solution")
             solution = extract_solution(answer)
+            # 构建对话：可选system + user
+            messages = []
+            if system_prompt and len(system_prompt.strip()) > 0:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": question})
+
             data = {
                 "data_source": data_source,
-                "prompt": [{"role": "user", "content": question}],
+                "prompt": messages,
                 "ability": "math",
                 "reward_model": {"style": "rule", "ground_truth": solution},
                 "extra_info": {"split": split, "index": idx},
@@ -78,7 +89,7 @@ if __name__ == "__main__":
 
         return process_fn
 
-    train_dataset = train_dataset.map(function=make_map_fn("train"), with_indices=True)
+    train_dataset = train_dataset.map(function=make_map_fn("train", args.system_prompt), with_indices=True)
     # test_dataset = test_dataset.map(function=make_map_fn("test"), with_indices=True)
 
     local_dir = args.local_dir

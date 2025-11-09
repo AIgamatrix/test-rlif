@@ -17,8 +17,12 @@ def make_map_fn(split, source=None):
                 "data_source": data_source,
                 "prompt": [
                     {
+                        "role": "system",
+                        "content": "Let's think step by step, and each step is atomic (single core reasoning/operation/answer). "
+                    },
+                    {
                         "role": "user",
-                        "content": question,
+                        "content": question + "\n If this is math problem, do not use python code. please output the final answer within \\boxed{}.",
                     }
                 ],
                 "ability": "math",
@@ -34,7 +38,7 @@ def make_map_fn(split, source=None):
 
 if __name__ == '__main__':
 
-    data_source = 'AIME-TTT'
+    data_source = 'MyRLIF/verl/data/AIME-TTT'
 
     train_dataset = datasets.load_dataset("json", data_files=os.path.join(data_source, 'train.json'), split='train')
     test_dataset = datasets.load_dataset("json", data_files=os.path.join(data_source, 'test.json'), split='train')

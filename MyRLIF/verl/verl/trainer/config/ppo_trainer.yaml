@@ -186,6 +186,10 @@ reward_model:
     n_samples_per_prompt: 8
     n_votes_per_prompt: 8
     mode: "train"
+    cluster_backend: null
+    embedding_model_name: "tbs17/MathBERT"
+    sim_threshold: 0.78
+    embed_device: "cuda"
 
 custom_reward_function:
   path: null

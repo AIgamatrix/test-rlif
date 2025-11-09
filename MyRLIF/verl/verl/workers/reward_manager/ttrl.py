@@ -13,6 +13,8 @@
 # limitations under the License.
 
 from collections import defaultdict
+from typing import Optional
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -20,13 +22,13 @@ import torch
 from verl import DataProto
 from verl.utils.reward_score.ttrl.auto_verify import auto_verify
 from verl.utils.reward_score.ttrl.ttt_metrics import (
-    post_test_time_train_metrics, test_time_train_metrics)
+    post_test_time_train_metrics, test_time_train_metrics, reverse_auc_rewards_for_group, build_embedder)
 
 
 class TTRLRewardManager:
     """The reward manager."""
 
-    def __init__(self, tokenizer, num_examine, reward_fn_key="data_source", compute_score=None, n_votes_per_prompt=1, n_samples_per_prompt=1, mode="eval", eval_n_samples=1) -> None:
+    def __init__(self, tokenizer, num_examine, reward_fn_key="data_source", compute_score=None, n_votes_per_prompt=1, n_samples_per_prompt=1, mode="eval", eval_n_samples=1, penalty_reward: float = -1, sim_threshold: float = 0.6, cluster_backend: str = "embedding", embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2", embed_device: Optional[str] = None) -> None:
         self.tokenizer = tokenizer
         self.num_examine = num_examine  # the number of batches of decoded responses to print to the console
         self.reward_fn_key = reward_fn_key
@@ -34,18 +36,49 @@ class TTRLRewardManager:
         self.n_samples_per_prompt = n_samples_per_prompt
         self.mode = mode
         self.eval_n_samples = eval_n_samples
+        self.penalty_reward = penalty_reward
+        self.sim_threshold = sim_threshold
+        self.cluster_backend = cluster_backend
+        self.embedding_model_name = embedding_model_name
+        self.embed_device = embed_device
+        self.embedder = None
+        if self.cluster_backend == "embedding":
+            # Initialize embedder once
+            self.embedder = build_embedder(self.embedding_model_name, device=self.embed_device)
+            # Light warm-up to trigger lazy initialization and CUDA graph
+            try:
+                if self.embedder is not None:
+                    _ = self.embedder.encode(["warmup", "预热"])
+            except Exception:
+                pass
         assert n_votes_per_prompt >= n_samples_per_prompt, f"For TTRL settings, n_votes_per_prompt {n_votes_per_prompt} should be greater than or equal to n_samples_per_prompt {n_samples_per_prompt}"
 
-        print(f"TTRLRewardManager initialized with n_votes_per_prompt {n_votes_per_prompt}, n_samples_per_prompt {n_samples_per_prompt}, eval_n_samples {eval_n_samples}")
-
+        embedder_backend = getattr(self.embedder, 'backend', None) if self.embedder is not None else None
+        print("="*60)
+        print(f"TTRLRewardManager initialized with n_votes_per_prompt {n_votes_per_prompt}, n_samples_per_prompt {n_samples_per_prompt}, eval_n_samples {eval_n_samples}, penalty_reward {penalty_reward}, sim_threshold {sim_threshold}, cluster_backend {cluster_backend}, embed_model {embedding_model_name}, embed_backend {embedder_backend}")
+        print("="*60)
 
     def _data_source_to_task(self, data_source):
-        if data_source in ["MATH-TTT", "AIME-TTT", "AMC-TTT"]:
+        # Normalize potential path-like sources to base name and uppercase for matching
+        try:
+            base = Path(str(data_source)).name
+        except Exception:
+            base = str(data_source).split("/")[-1]
+        name = base.strip().upper()
+
+        # Exact matches first
+        if name in ["MATH-TTT", "AIME-TTT", "AMC-TTT"]:
             return "math"
-        elif data_source in ["GPQA-TTT"]:
+        if name in ["GPQA-TTT", "GPQA"]:
             return "gpqa"
-        else:
-            raise NotImplementedError(f"Data source {data_source} is not supported for TTRLRewardManager")
+
+        # Fallback: substring-based mapping
+        if any(k in name for k in ["MATH", "AIME", "AMC"]):
+            return "math"
+        if "GPQA" in name:
+            return "gpqa"
+
+        raise NotImplementedError(f"Data source {data_source} is not supported for TTRLRewardManager")
 
     def compute_post_ttrl_metrics(self, data: DataProto):
         """
@@ -149,7 +182,16 @@ class TTRLRewardManager:
                     group_pred_outputs.append(response_str)
                     group_extra_info.append(extra_info)
                 
-                rewards, ttrl_metrics = test_time_train_metrics(group_pred_outputs, group_labels, task=task, extra_info=group_extra_info)
+                # Custom step-based reverse AUC rewards (no need for ground truth here)
+                rewards, ttrl_metrics = reverse_auc_rewards_for_group(
+                    group_pred_outputs,
+                    penalty_reward=self.penalty_reward,
+                    sim_threshold=self.sim_threshold,
+                    cluster_backend=self.cluster_backend,
+                    embedding_model_name=self.embedding_model_name,
+                    embed_device=self.embed_device,
+                    embedder=self.embedder,
+                )
 
                 for k, v in ttrl_metrics.items():
                     all_ttrl_metrics[k].append(v)
@@ -167,6 +209,10 @@ class TTRLRewardManager:
                         print("[prompt]", prompt_str)
                         print("[response]", response_str)
                         print("[score]", rewards[i])
+
+                # Print group-level cluster count once per group
+                if "cluster_count" in ttrl_metrics:
+                    print("[cluster_count_group]", ttrl_metrics["cluster_count"])
 
             data.batch["acc"] = torch.tensor(scores, dtype=torch.float32, device=data.batch["prompts"].device)
             
@@ -221,7 +267,19 @@ class TTRLRewardManager:
                     if task != self._data_source_to_task(data_source):
                         raise NotImplementedError(f"Non consistent task {task} and {self._data_source_to_task(data_source)} for TTRLRewardManager")
 
-            rewards, verify_extra_info = auto_verify(task, group_pred_outputs, group_labels, extra_info=group_extra_info)
+            # Use custom step-based reverse AUC rewards for eval as well
+            rewards, group_metrics = reverse_auc_rewards_for_group(
+                group_pred_outputs,
+                penalty_reward=self.penalty_reward,
+                sim_threshold=self.sim_threshold,
+                cluster_backend=self.cluster_backend,
+                embedding_model_name=self.embedding_model_name,
+                embed_device=self.embed_device,
+                embedder=self.embedder,
+            )
+            if "cluster_count" in group_metrics:
+                print("[cluster_count_group]", group_metrics["cluster_count"])
+            verify_extra_info = {}
 
             for k, v in verify_extra_info.items():
                 if isinstance(v, list):
@@ -230,7 +288,7 @@ class TTRLRewardManager:
             for i in range(len(data)):
                 reward_tensor[i, valid_response_length - 1] = rewards[i]
 
-            # Compute TTRL metrics
+            # Compute group-level metrics using reverse AUC scheme
             all_ttrl_metrics = defaultdict(list)
             prompt_num = len(data) // self.eval_n_samples
             for prompt_i in range(prompt_num):
@@ -264,7 +322,15 @@ class TTRLRewardManager:
                     group_pred_outputs_ttrl.append(response_str)
                     group_extra_info_ttrl.append(extra_info)
                 
-                _, ttrl_metrics = test_time_train_metrics(group_pred_outputs_ttrl, group_labels_ttrl, task=task, extra_info=group_extra_info_ttrl)
+                _, ttrl_metrics = reverse_auc_rewards_for_group(
+                    group_pred_outputs_ttrl,
+                    penalty_reward=self.penalty_reward,
+                    sim_threshold=self.sim_threshold,
+                    cluster_backend=self.cluster_backend,
+                    embedding_model_name=self.embedding_model_name,
+                    embed_device=self.embed_device,
+                    embedder=self.embedder,
+                )
                 for k, v in ttrl_metrics.items():
                     all_ttrl_metrics[k].append(v)
             

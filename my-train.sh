@@ -1,11 +1,11 @@
 source ~/miniconda3/etc/profile.d/conda.sh
 
-conda deactivate 
+conda deactivate
 
-conda activate intuit
+conda activate empo
 echo "当前激活的环境: $(conda info )"
 source ./set_path.sh
 
-cd  ./Intuitor/verl-intuitor
+cd  ./MyRLIF/verl
 
-bash math_intuitor.sh
+bash examples/ttrl/Qwen-2.5-Math/aime.sh

@@ -39,10 +39,20 @@ class Tracking:
         self.logger = {}
 
         if "tracking" in default_backend or "wandb" in default_backend:
+            import os
             import wandb
 
-            wandb.init(project=project_name, name=experiment_name, config=config)
-            self.logger["wandb"] = wandb
+            try:
+                wandb.init(project=project_name, name=experiment_name, config=config)
+                self.logger["wandb"] = wandb
+            except Exception as e:
+                # Gracefully degrade when running without TTY or missing API key
+                mode = os.environ.get("WANDB_MODE", "")
+                print(f"[tracking] wandb init failed: {e}.")
+                if mode.lower() == "offline":
+                    print("[tracking] WANDB_MODE=offline; continuing without online sync.")
+                else:
+                    print("[tracking] Falling back to console-only logging. Configure WANDB_API_KEY or run `wandb login` to enable.")
 
         if "mlflow" in default_backend:
             import os
